@@ -15,6 +15,7 @@
 		[
 			"add_executable",
 			"target_link_libraries",
+			"target_compile_options",
 			"include_directories"
 		],
 		"files" : 
@@ -41,6 +42,12 @@
 			{
 				"command" : 2,
 				"file" : 0,
+				"line" : 33,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
 				"line" : 18,
 				"parent" : 0
 			}
@@ -53,64 +60,140 @@
 			[
 				{
 					"fragment" : "-g -std=gnu11 -fdiagnostics-color=always"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/gtk-4.0"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/pango-1.0"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/fribidi"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/harfbuzz"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/gdk-pixbuf-2.0"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/webp"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-DLIBDEFLATE_DLL"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/cairo"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/freetype2"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/libpng16"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/pixman-1"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/graphene-1.0"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../lib/graphene-1.0/include"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-mfpmath=sse"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-msse"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-msse2"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../include/glib-2.0"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-IC:/msys64/mingw64/bin/../lib/glib-2.0/include"
 				}
 			],
 			"includes" : 
 			[
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/gtk-4.0"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/pango-1.0"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/fribidi"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/harfbuzz"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/gdk-pixbuf-2.0"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/webp"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/cairo"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/freetype2"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/libpng16"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/pixman-1"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/graphene-1.0"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../lib/graphene-1.0/include"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../include/glib-2.0"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "C:/msys64/mingw64/bin/../lib/glib-2.0/include"
 				}
 			],
