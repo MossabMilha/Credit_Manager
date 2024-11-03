@@ -20,6 +20,7 @@ include_directories(${GTK4_INCLUDE_DIRS})
 # Add your source files
 set(SOURCE_FILES
         main.c  # Your main file
+        Most_Used_Password.txt
         # Add other source files here if needed
 )
 
