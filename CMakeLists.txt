@@ -17,18 +17,22 @@ endif()
 # Include GTK include directories
 include_directories(${GTK4_INCLUDE_DIRS})
 
+# Find the CURL library
+find_package(CURL REQUIRED)
+
+# Include CURL include directories
+include_directories(${CURL_INCLUDE_DIRS})
+
 # Add your source files
 set(SOURCE_FILES
         main.c  # Your main file
+        alerts.c
         Most_Used_Password.txt
-        # Add other source files here if needed
 )
 
-# Add your executable
+# Add your executable and link it with GTK4 and CURL libraries
 add_executable(C_UI ${SOURCE_FILES})
-
-# Link the GTK libraries
-target_link_libraries(C_UI ${GTK4_LIBRARIES})
+target_link_libraries(C_UI ${GTK4_LIBRARIES} ${CURL_LIBRARIES})
 
 # Ensure the executable uses the GTK framework correctly
 target_compile_options(C_UI PRIVATE ${GTK4_CFLAGS})
@@ -37,5 +41,3 @@ target_compile_options(C_UI PRIVATE ${GTK4_CFLAGS})
 set_target_properties(C_UI PROPERTIES
         LINK_FLAGS "-Wl,--enable-auto-import"
 )
-
-
