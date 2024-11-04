@@ -84,7 +84,7 @@ int send_email(const char *access_token, const char *to_email, const char *subje
     return (res == CURLE_OK) ? 0 : 1;
 }
 
-int main() {
+int smth() {
     const char *access_token = "ya29.a0AeDClZAPDTFRpBnq5oSAtEAcQBFVl3oU7QAoORg9442dyQsiU_fI0TTltT8LrRA-Sfc6BLSutE9xr9NrGCHeX4haSO7OXwe4h41Bmnupe8dzj2_BpzxH-FOoC3NfkdtufvuHnvljQQvur_KD24f377oecA3m2wjVMcBubKdiaCgYKAUUSARMSFQHGX2MiLxpBC29NC5LxoqCQQuM3Qg0175";
     const char *to_email = "omaymamesbahi15@gmail.com";
     const char *subject = "Test Email";
