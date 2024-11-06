@@ -30,14 +30,12 @@ set(SOURCE_FILES
         Most_Used_Password.txt
 )
 
-# Add your executable and link it with GTK4 and CURL libraries
+# Add your executable and link it with GTK4, CURL, and regex libraries
 add_executable(C_UI ${SOURCE_FILES})
-target_link_libraries(C_UI ${GTK4_LIBRARIES} ${CURL_LIBRARIES})
+target_link_libraries(C_UI ${GTK4_LIBRARIES} ${CURL_LIBRARIES} regex)
 
 # Ensure the executable uses the GTK framework correctly
 target_compile_options(C_UI PRIVATE ${GTK4_CFLAGS})
 
 # Optional: Add additional settings for linking, if needed
-set_target_properties(C_UI PROPERTIES
-        LINK_FLAGS "-Wl,--enable-auto-import"
-)
+set_target_properties(C_UI PROPERTIES LINK_FLAGS "-Wl,--enable-auto-import")

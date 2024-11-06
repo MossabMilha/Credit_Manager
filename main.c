@@ -3,11 +3,11 @@
 #include <string.h>
 #include <gtk/gtk.h>
 #include <regex.h>
+#define MIN_PASSWORD_LENGTH 8
+#define SPECIAL_CHARACTERS "!@#$%^&*()-_=+[]{}|;:'\",.<>?/\\"
 
 #define KEY "1A5"
-char UP_CASE[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-char LOW_CASE[] = "abcdefghijklmnopqrstuvwxyz";
-char DIGITS[] = "0123456789";
+
 
 typedef struct {
     char *email;
@@ -18,170 +18,302 @@ void show_error_message(GtkWindow *parent, const char *message) {
     g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_close), NULL);
     gtk_widget_show(dialog);
 }
-char check_first_name(const char *first_name,const char *last_name) {
-    GtkWidget *button = NULL;
+void check_first_name(const char *first_name, GtkWidget *first_name_button) {
     while (*first_name) {
         if (isdigit(*first_name)) {
-            GtkWidget *button = gtk_button_new();
-            GtkCssProvider *css_provider = gtk_css_provider_new();
-            gtk_css_provider_load_from_data(css_provider,"button {"
-        "  min-width: 100px;"
-        "  min-height: 100px;"
-        "  border-radius: 50%;"
-        "  background-color: #4CAF50;"
-        "}", -1);
-
+            gtk_widget_set_visible(first_name_button, TRUE);
+            return;
         }
-        }
-
-
+        first_name++;
+    }
+    gtk_widget_set_visible(first_name_button, FALSE);
 }
-/*
-void check_first_name(const ) {
-
-}*/
-void check_password(const gchar *password,const gchar *confirm_password, const gchar *first_name, const gchar *last_name, GtkWindow *parent) {
-    const int is_Same =strncmp(password ,confirm_password,strlen(password));
-    char message[1024] = "";
-    if(!is_Same){
-
-        char content[1000];
-
-        FILE* file;
-        file = fopen("C:\\Users\\PC\\CLionProjects\\C_UI\\Most_Used_Password.txt", "r");
-        if (file != NULL) {
-            while (fgets(content, sizeof(content), file) != NULL) {
-                content[strcspn(content, "\n")] = '\0';  // Remove newline character strncmp(content ,password,strlen(content)-1)
-                if (strcmp(content, password) == 0) {
-                    strcat(message, "Weak password: easy to guess.\n");
-                    break; // Exit loop if we find a match
-                }
-            }
-            fclose(file);
-        } else {
-            strcat(message, "Could not open password file.\n");
+void check_last_name(const char *last_name, GtkWidget *last_name_button) {
+    while (*last_name) {
+        if (isdigit(*last_name)) {
+            gtk_widget_set_visible(last_name_button, TRUE);
+            return;
         }
+        last_name++;
+    }
+    gtk_widget_set_visible(last_name_button, FALSE);
+}
+void check_CIN(const char *cin, GtkWidget *cin_button) {
+    regex_t regex;
+    int reti;
 
-        if (strstr(password, first_name) != NULL || strstr(password, last_name) != NULL) {
-            strcat(message, "Your password contains part of your name.\n");
-        }
+    // Compile the regular expression
+    reti = regcomp(&regex, "^[A-Za-z]{1,2}[0-9]{1,6}$", REG_EXTENDED);
+    if (reti) {
+        fprintf(stderr, "Could not compile regex\n");
+        return;
+    }
 
-        int result[3] = {0, 0, 0}; // [uppercase, lowercase, digit]
-        for (int i = 0; i < strlen(password); i++) {
-            if (strchr(UP_CASE, password[i])) {
-                result[0] = 1; // Uppercase found
-            }
-            if (strchr(LOW_CASE, password[i])) {
-                result[1] = 1; // Lowercase found
-            }
-            if (strchr(DIGITS, password[i])) {
-                result[2] = 1; // Digit found
-            }
-        }
+    // Execute the regular expression
+    reti = regexec(&regex, cin, 0, NULL, 0);
+    if (!reti) {
+        // CIN is valid
+        gtk_widget_set_visible(cin_button, FALSE);
+    } else if (reti == REG_NOMATCH) {
+        // CIN is invalid
+        gtk_widget_set_visible(cin_button, TRUE);
+    } else {
+        char msgbuf[100];
+        regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+        fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+    }
 
-        // Short messages for missing criteria
-        if (!result[0]) strcat(message, "Add at least one uppercase letter.\n");
-        if (!result[1]) strcat(message, "Add at least one lowercase letter.\n");
-        if (!result[2]) strcat(message, "Add at least one digit.\n");
+    // Free the compiled regular expression
+    regfree(&regex);
+}
 
-        // Show the error message if there are issues
-        if (strlen(message) > 0) {
-            show_error_message(parent, message);
-        } else {
-            printf("Password is acceptable.\n");
-        }
-    }else {
-        strcat(message,"The Password and The Confirmation should be the Same");
-        show_error_message(parent,message);
+void check_email(const char *email,GtkWidget *gmail_button) {
+    regex_t regex;
+    int reti;
+
+    // Define the regular expression for a valid Gmail email format
+    const char *pattern = "^[A-Za-z0-9._%+-]+@gmail\\.com$";
+
+    // Compile the regular expression
+    reti = regcomp(&regex, pattern, REG_EXTENDED);
+    if (reti) {
+        fprintf(stderr, "Could not compile regex\n");
+    }
+
+    // Execute the regular expression
+    reti = regexec(&regex, email, 0, NULL, 0);
+    regfree(&regex);
+
+    if (!reti) {
+        gtk_widget_set_visible(gmail_button, FALSE);; // Email format is valid
+    } else if (reti == REG_NOMATCH) {
+        gtk_widget_set_visible(gmail_button, TRUE); // Email format is invalid
+    } else {
+        char msgbuf[100];
+        regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+        fprintf(stderr, "Regex match failed: %s\n", msgbuf);
     }
 }
+
+void check_birthday(const char *birthday, GtkWidget *birthday_button) {
+    regex_t regex;
+    int reti;
+
+    // Define the regular expression for a valid birthday format
+    const char *pattern = "^[0-3][0-9]/[0-1][0-9]/[0-9]{4}$";
+
+    // Compile the regular expression
+    reti = regcomp(&regex, pattern, REG_EXTENDED);
+    if (reti) {
+        fprintf(stderr, "Could not compile regex\n");
+        return;
+    }
+
+    // Execute the regular expression
+    reti = regexec(&regex, birthday, 0, NULL, 0);
+    if (reti == REG_NOMATCH) {
+        gtk_widget_set_visible(birthday_button, TRUE); // Invalid format
+        regfree(&regex);
+        return;
+    }
+
+    // Parse the date
+    int day, month, year;
+    sscanf(birthday, "%2d/%2d/%4d", &day, &month, &year);
+
+    // Get the current date
+    time_t t = time(NULL);
+    struct tm *current_time = localtime(&t);
+
+    // Calculate the age
+    int age = current_time->tm_year + 1900 - year;
+    if (current_time->tm_mon + 1 < month || (current_time->tm_mon + 1 == month && current_time->tm_mday < day)) {
+        age--;
+    }
+
+    // Check if the user is more than 18 years old
+    if (age >= 18) {
+        gtk_widget_set_visible(birthday_button, FALSE); // Valid birthday
+    } else {
+        gtk_widget_set_visible(birthday_button, TRUE); // Invalid birthday
+    }
+
+    // Free the compiled regular expression
+    regfree(&regex);
+}
+
+void check_password(const gchar *password, const gchar *confirm_password, const gchar *first_name, const gchar *last_name, GtkWidget *password_button) {
+    char message[1024] = "";
+
+    // Check if password and confirmation password are identical
+    if (strcmp(password, confirm_password) != 0) {
+        strcat(message, "The Password and The Confirmation should be the same.\n");
+    }
+
+    // Check if password is in the most used password list
+    char content[1000];
+    FILE *file = fopen("Most_Used_Password.txt", "r");
+    if (file != NULL) {
+        while (fgets(content, sizeof(content), file) != NULL) {
+            content[strcspn(content, "\n")] = '\0';  // Remove newline character
+            if (strcmp(content, password) == 0) {
+                strcat(message, "Weak password: easy to guess.\n");
+                break;
+            }
+        }
+        fclose(file);
+    } else {
+        strcat(message, "Could not open password file.\n");
+    }
+
+    // Check if password contains part of the user's name
+    if (strstr(password, first_name) != NULL || strstr(password, last_name) != NULL) {
+        strcat(message, "Your password contains part of your name.\n");
+    }
+
+    // Check password length
+    if (strlen(password) < MIN_PASSWORD_LENGTH) {
+        strcat(message, "Password must be at least 8 characters long.\n");
+    }
+
+    // Check for uppercase, lowercase, digit, and special character
+    int has_upper = 0, has_lower = 0, has_digit = 0, has_special = 0;
+    for (int i = 0; i < strlen(password); i++) {
+        if (isupper(password[i])) has_upper = 1;
+        if (islower(password[i])) has_lower = 1;
+        if (isdigit(password[i])) has_digit = 1;
+        if (strchr(SPECIAL_CHARACTERS, password[i])) has_special = 1;
+    }
+
+    if (!has_upper) strcat(message, "Add at least one uppercase letter.\n");
+    if (!has_lower) strcat(message, "Add at least one lowercase letter.\n");
+    if (!has_digit) strcat(message, "Add at least one digit.\n");
+    if (!has_special) strcat(message, "Add at least one special character.\n");
+
+    // Show or hide the button based on the validation results
+    if (strlen(message) > 0) {
+        gtk_widget_set_visible(password_button, TRUE);
+        fprintf(stderr, "%s", message);  // Print the error message for debugging
+    } else {
+        gtk_widget_set_visible(password_button, FALSE);
+    }
+}
+
+
 void check_SignUp(GtkWidget *widget, gpointer user_data) {
     // Retrieve the signup window from user_data
-    GtkWidget *signup_window=GTK_WIDGET(user_data);
-    GtkWidget *signup_fix = g_object_get_data(G_OBJECT(signup_window),"signup_fix");
+    GtkWidget *signup_window = GTK_WIDGET(user_data);
+    GtkWidget *signup_fix = g_object_get_data(G_OBJECT(signup_window), "signup_fix");
     int is_feild_empty = 0;
 
-    //Retrieve the first_name information
-    GtkWidget *First_Name = g_object_get_data(G_OBJECT(signup_window),"First Name");
+    // Retrieve the first_name information
+    GtkWidget *First_Name = g_object_get_data(G_OBJECT(signup_window), "First Name");
     GtkEntryBuffer *first_name_buffer = gtk_entry_get_buffer(GTK_ENTRY(First_Name));
     const gchar *first_name_text = gtk_entry_buffer_get_text(first_name_buffer);
 
-    GtkWidget *First_Name_Button = g_object_get_data(G_OBJECT(signup_window),"First Name Image");
+    GtkWidget *First_Name_Button = g_object_get_data(G_OBJECT(signup_window), "First Name Image");
 
-    if(strlen(first_name_text) == 0) {
+    if (strlen(first_name_text) == 0) {
         is_feild_empty = 1;
         gtk_widget_set_visible(First_Name_Button, TRUE);
-    }else {
+    } else {
         gtk_widget_set_visible(First_Name_Button, FALSE);
-        //check_first_name(first_name_text);
+        check_first_name(first_name_text, First_Name_Button);
     }
 
-
-    //Retrieve the Last_name information
-    GtkWidget *Last_Name = g_object_get_data(G_OBJECT(signup_window),"Last Name");
+    // Retrieve the Last_name information
+    GtkWidget *Last_Name = g_object_get_data(G_OBJECT(signup_window), "Last Name");
     GtkEntryBuffer *Last_Name_buffer = gtk_entry_get_buffer(GTK_ENTRY(Last_Name));
     const gchar *Last_Name_text = gtk_entry_buffer_get_text(Last_Name_buffer);
-    if(strlen(Last_Name_text) == 0)
-        is_feild_empty =1;
 
-    //Retrieve the Last_name information
-    GtkWidget *CIN = g_object_get_data(G_OBJECT(signup_window),"CIN");
+    GtkWidget *Last_Name_Button = g_object_get_data(G_OBJECT(signup_window), "Last Name Image");
+
+    if (strlen(Last_Name_text) == 0) {
+        is_feild_empty = 1;
+        gtk_widget_set_visible(Last_Name_Button, TRUE);
+    } else {
+        gtk_widget_set_visible(Last_Name_Button, FALSE);
+        check_last_name(Last_Name_text, Last_Name_Button);
+    }
+
+    // Retrieve the CIN information
+    GtkWidget *CIN = g_object_get_data(G_OBJECT(signup_window), "CIN");
     GtkEntryBuffer *CIN_buffer = gtk_entry_get_buffer(GTK_ENTRY(CIN));
     const gchar *CIN_text = gtk_entry_buffer_get_text(CIN_buffer);
-    if(strlen(CIN_text) == 0)
-        is_feild_empty =1;
 
-    //Retrieve the Last_name information
-    GtkWidget *Email = g_object_get_data(G_OBJECT(signup_window),"Email");
+    GtkWidget *CIN_Button = g_object_get_data(G_OBJECT(signup_window), "CIN Image");
+
+    if (strlen(CIN_text) == 0) {
+        is_feild_empty = 1;
+        gtk_widget_set_visible(CIN_Button, TRUE);
+    } else {
+        gtk_widget_set_visible(CIN_Button, FALSE);
+        check_CIN(CIN_text, CIN_Button);
+    }
+
+    // Retrieve the Email information
+    GtkWidget *Email = g_object_get_data(G_OBJECT(signup_window), "Email");
     GtkEntryBuffer *Email_buffer = gtk_entry_get_buffer(GTK_ENTRY(Email));
     const gchar *Email_text = gtk_entry_buffer_get_text(Email_buffer);
-    if(strlen(Email_text) == 0)
-        is_feild_empty =1;
 
-    //Retrieve the Last_name information
-    GtkWidget *Birthday = g_object_get_data(G_OBJECT(signup_window),"Birthday DD//MM//YYY");
+    GtkWidget *Email_Button = g_object_get_data(G_OBJECT(signup_window), "Email Image");
+
+    if (strlen(Email_text) == 0) {
+        is_feild_empty = 1;
+        gtk_widget_set_visible(Email_Button, TRUE);
+    } else {
+        gtk_widget_set_visible(Email_Button, FALSE);
+        check_email(Email_text, Email_Button);
+    }
+
+    // Retrieve the Birthday information
+    GtkWidget *Birthday = g_object_get_data(G_OBJECT(signup_window), "Birthday DD//MM//YYY");
     GtkEntryBuffer *Birthday_buffer = gtk_entry_get_buffer(GTK_ENTRY(Birthday));
     const gchar *Birthday_text = gtk_entry_buffer_get_text(Birthday_buffer);
-    if(strlen(Birthday_text) == 0)
-        is_feild_empty =1;
 
-    //Retrieve the Last_name information
-    GtkWidget *Password = g_object_get_data(G_OBJECT(signup_window),"Password");
+    GtkWidget *Birthday_Button = g_object_get_data(G_OBJECT(signup_window), "Birthday Image");
+
+    if (strlen(Birthday_text) == 0) {
+        is_feild_empty = 1;
+        gtk_widget_set_visible(Birthday_Button, TRUE);
+    } else {
+        gtk_widget_set_visible(Birthday_Button, FALSE);
+        check_birthday(Birthday_text, Birthday_Button);
+    }
+
+    // Retrieve the Password information
+    GtkWidget *Password = g_object_get_data(G_OBJECT(signup_window), "Password");
     GtkEntryBuffer *Password_buffer = gtk_entry_get_buffer(GTK_ENTRY(Password));
-    const gchar *Password_text = gtk_entry_buffer_get_text(Password_buffer);
-    if(strlen(Password_text) == 0)
-        is_feild_empty =1;
 
-    //Retrieve the Last_name information
-    GtkWidget *Confirm_Password = g_object_get_data(G_OBJECT(signup_window),"Confirm Password");
+    GtkWidget *Confirm_Password = g_object_get_data(G_OBJECT(signup_window), "Confirm Password");
     GtkEntryBuffer *Confirm_Password_buffer = gtk_entry_get_buffer(GTK_ENTRY(Confirm_Password));
+
+    const gchar *Password_text = gtk_entry_buffer_get_text(Password_buffer);
     const gchar *Confirm_Password_text = gtk_entry_buffer_get_text(Confirm_Password_buffer);
 
-    if(strlen(Confirm_Password_text) == 0)
-        is_feild_empty =1;
+    GtkWidget *Password_Button = g_object_get_data(G_OBJECT(signup_window), "Password Image");
+
+    if (strlen(Password_text) == 0 || strlen(Confirm_Password_text) == 0) {
+        is_feild_empty = 1;
+        gtk_widget_set_visible(Password_Button, TRUE);
+    } else {
+        gtk_widget_set_visible(Password_Button, FALSE);
+        check_password(Password_text, Confirm_Password_text, first_name_text, Last_Name_text, Password_Button);
+    }
+
     if (is_feild_empty) {
         GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(signup_window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "ALL Fields Required");
         g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_close), NULL);
         gtk_widget_show(dialog);
-
-    }else {
-
-        check_password(Password_text,Confirm_Password_text,first_name_text,Last_Name_text,(GtkWindow *)user_data);
-
     }
 
-    g_print("first_name: %s\n",first_name_text);
-    g_print("last_name: %s\n",Last_Name_text);
-    g_print("cin: %s\n",CIN_text);
-    g_print("Email: %s\n",Email_text);
-    g_print("Birthday: %s\n",Birthday_text);
-    g_print("Password: %s\n",Password_text);
-    g_print("Confirm Password : %s\n",Confirm_Password_text);
-
-
-
-
-
+    g_print("first_name: %s\n", first_name_text);
+    g_print("last_name: %s\n", Last_Name_text);
+    g_print("cin: %s\n", CIN_text);
+    g_print("Email: %s\n", Email_text);
+    g_print("Birthday: %s\n", Birthday_text);
+    g_print("Password: %s\n", Password_text);
+    g_print("Confirm Password : %s\n", Confirm_Password_text);
 }
 
 static void signup_button_clicked(GtkButton *button, gpointer user_data) {
@@ -309,6 +441,7 @@ static void signup_button_clicked(GtkButton *button, gpointer user_data) {
     gtk_widget_set_size_request(Password_Confirmation, 250, 25);
     gtk_entry_set_visibility(GTK_ENTRY(Password_Confirmation),FALSE);
     gtk_entry_set_invisible_char(GTK_ENTRY(Password_Confirmation),'*');
+
 
     //Confirm image
     GtkWidget *Confirm_Password_button = gtk_button_new();
