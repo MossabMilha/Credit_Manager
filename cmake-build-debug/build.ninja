@@ -63,6 +63,13 @@ build CMakeFiles/C_UI.dir/alerts.c.obj: C_COMPILER__C_UI_unscanned_Debug C$:/Use
   OBJECT_DIR = CMakeFiles\C_UI.dir
   OBJECT_FILE_DIR = CMakeFiles\C_UI.dir
 
+build CMakeFiles/C_UI.dir/Check_Email_2FA.c.obj: C_COMPILER__C_UI_unscanned_Debug C$:/Users/PC/CLionProjects/C_UI/Check_Email_2FA.c || cmake_object_order_depends_target_C_UI
+  DEP_FILE = CMakeFiles\C_UI.dir\Check_Email_2FA.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always -IC:/msys64/mingw64/bin/../include/gtk-4.0 -IC:/msys64/mingw64/bin/../include/pango-1.0 -IC:/msys64/mingw64/bin/../include/fribidi -IC:/msys64/mingw64/bin/../include -IC:/msys64/mingw64/bin/../include/harfbuzz -IC:/msys64/mingw64/bin/../include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/bin/../include/webp -DLIBDEFLATE_DLL -IC:/msys64/mingw64/bin/../include/cairo -IC:/msys64/mingw64/bin/../include/freetype2 -IC:/msys64/mingw64/bin/../include/libpng16 -IC:/msys64/mingw64/bin/../include/pixman-1 -IC:/msys64/mingw64/bin/../include/graphene-1.0 -IC:/msys64/mingw64/bin/../lib/graphene-1.0/include -mfpmath=sse -msse -msse2 -IC:/msys64/mingw64/bin/../include/glib-2.0 -IC:/msys64/mingw64/bin/../lib/glib-2.0/include
+  INCLUDES = -IC:/msys64/mingw64/bin/../include/gtk-4.0 -IC:/msys64/mingw64/bin/../include/pango-1.0 -IC:/msys64/mingw64/bin/../include/fribidi -IC:/msys64/mingw64/bin/../include/harfbuzz -IC:/msys64/mingw64/bin/../include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/bin/../include/webp -IC:/msys64/mingw64/bin/../include/cairo -IC:/msys64/mingw64/bin/../include/freetype2 -IC:/msys64/mingw64/bin/../include/libpng16 -IC:/msys64/mingw64/bin/../include/pixman-1 -IC:/msys64/mingw64/bin/../include/graphene-1.0 -IC:/msys64/mingw64/bin/../lib/graphene-1.0/include -IC:/msys64/mingw64/bin/../include/glib-2.0 -IC:/msys64/mingw64/bin/../lib/glib-2.0/include
+  OBJECT_DIR = CMakeFiles\C_UI.dir
+  OBJECT_FILE_DIR = CMakeFiles\C_UI.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target C_UI
@@ -71,7 +78,7 @@ build CMakeFiles/C_UI.dir/alerts.c.obj: C_COMPILER__C_UI_unscanned_Debug C$:/Use
 #############################################
 # Link the executable C_UI.exe
 
-build C_UI.exe: C_EXECUTABLE_LINKER__C_UI_Debug CMakeFiles/C_UI.dir/main.c.obj CMakeFiles/C_UI.dir/alerts.c.obj | C$:/msys64/mingw64/lib/libcurl.dll.a
+build C_UI.exe: C_EXECUTABLE_LINKER__C_UI_Debug CMakeFiles/C_UI.dir/main.c.obj CMakeFiles/C_UI.dir/alerts.c.obj CMakeFiles/C_UI.dir/Check_Email_2FA.c.obj | C$:/msys64/mingw64/lib/libcurl.dll.a
   FLAGS = -g
   LINK_FLAGS = -Wl,--enable-auto-import
   LINK_LIBRARIES = -lgtk-4  -lpangowin32-1.0  -lpangocairo-1.0  -lpango-1.0  -lharfbuzz  -lgdk_pixbuf-2.0  -lcairo-gobject  -lcairo  -lvulkan-1  -lgraphene-1.0  -lgio-2.0  -lgobject-2.0  -lglib-2.0  -lintl  C:/msys64/mingw64/lib/libcurl.dll.a  -lregex  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32

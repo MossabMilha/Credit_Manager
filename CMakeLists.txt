@@ -28,6 +28,8 @@ set(SOURCE_FILES
         main.c  # Your main file
         alerts.c
         Most_Used_Password.txt
+        Check_Email_2FA.h
+        Check_Email_2FA.c
 )
 
 # Add your executable and link it with GTK4, CURL, and regex libraries

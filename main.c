@@ -3,6 +3,8 @@
 #include <string.h>
 #include <gtk/gtk.h>
 #include <regex.h>
+#include "Check_Email_2FA.h"
+
 #define MIN_PASSWORD_LENGTH 8
 #define SPECIAL_CHARACTERS "!@#$%^&*()-_=+[]{}|;:'\",.<>?/\\"
 
@@ -152,7 +154,7 @@ void check_password(const gchar *password, const gchar *confirm_password, const 
 
     // Check if password is in the most used password list
     char content[1000];
-    FILE *file = fopen("Most_Used_Password.txt", "r");
+    FILE *file = fopen("../Most_Used_Password.txt", "r");
     if (file != NULL) {
         while (fgets(content, sizeof(content), file) != NULL) {
             content[strcspn(content, "\n")] = '\0';  // Remove newline character
@@ -199,6 +201,113 @@ void check_password(const gchar *password, const gchar *confirm_password, const 
     }
 }
 
+#include <gtk/gtk.h>
+
+void Email_2FA(GtkWidget *button, gpointer user_data);
+
+void open_new_window(const gchar *first_name, const gchar *last_name, const gchar *cin, const gchar *email, const gchar *birthday, const gchar *password) {
+    GtkWidget *new_window = gtk_window_new();
+    gtk_window_set_title(GTK_WINDOW(new_window), "New Window");
+    gtk_window_set_default_size(GTK_WINDOW(new_window), 350, 600);
+    gtk_window_set_resizable(GTK_WINDOW(new_window), FALSE);
+
+    // Create a fixed layout for the new window
+    GtkWidget *new_fix = gtk_fixed_new();
+    gtk_window_set_child(GTK_WINDOW(new_window), new_fix);
+
+    // Add labels to display the information
+    GtkWidget *title = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(title), "<span font='20' weight='bold' foreground='#ff8000'>Verify Your Email</span>");
+    gtk_fixed_put(GTK_FIXED(new_fix), title, 10, 50);
+
+    GtkWidget *Show_Email = gtk_label_new(NULL);
+    gchar *markup = g_markup_printf_escaped("<span font='20' weight='bold' foreground='#ff8000'>%s</span>", email);
+    gtk_label_set_markup(GTK_LABEL(Show_Email), markup);
+    g_free(markup);
+    gtk_fixed_put(GTK_FIXED(new_fix), Show_Email, 5, 100);
+
+    GtkWidget *Sent_Message = gtk_button_new_with_label("Send Message");
+    gtk_fixed_put(GTK_FIXED(new_fix), Sent_Message, 50, 380);
+    gtk_widget_set_size_request(Sent_Message, 250, 20);
+
+    // Store the fixed layout and button in the new_window object
+    g_object_set_data(G_OBJECT(new_window), "signup_fix", new_fix);
+    g_object_set_data(G_OBJECT(new_window), "Sent Message", Sent_Message);
+    g_object_set_data(G_OBJECT(new_window), "Show_Email", Show_Email);
+
+    g_signal_connect(Sent_Message, "clicked", G_CALLBACK(Email_2FA), new_window);
+
+    gtk_widget_show(new_window);
+}
+
+gboolean timeout_callback(gpointer user_data) {
+    GtkWidget *new_window = GTK_WIDGET(user_data);
+
+    // Show a dialog window that time is over
+    GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(new_window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Time is over. The program will terminate.");
+    g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_close), NULL);
+    gtk_widget_show(dialog);
+
+    // Terminate the whole program
+    exit(0);
+
+    return FALSE; // Stop the timeout
+}
+
+void new_function() {
+    g_print("Hello world\n");
+}
+
+void Email_2FA(GtkWidget *button, gpointer user_data) {
+    GtkWidget *new_window = GTK_WIDGET(user_data);
+
+    // Retrieve the fixed layout from the new_window object
+    GtkWidget *signup_fix = g_object_get_data(G_OBJECT(new_window), "signup_fix");
+    if (!GTK_IS_FIXED(signup_fix)) {
+        g_warning("signup_fix is not a valid GtkFixed widget");
+        return;
+    }
+
+    // Create the 2FA code entry widget
+    GtkWidget *Code_2FA = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(Code_2FA), "Enter the Code you Received");
+    gtk_fixed_put(GTK_FIXED(signup_fix), Code_2FA, 50, 300);
+    gtk_widget_set_size_request(Code_2FA, 250, 25);
+
+    // Retrieve the Sent_Message button from the new_window object
+    GtkWidget *Sent_Message = g_object_get_data(G_OBJECT(new_window), "Sent Message");
+    if (!GTK_IS_BUTTON(Sent_Message)) {
+        g_warning("Sent_Message is not a valid GtkButton widget");
+        return;
+    }
+
+    // Disconnect the existing signal handler
+    g_signal_handlers_disconnect_by_func(Sent_Message, G_CALLBACK(Email_2FA), new_window);
+
+    // Connect the new signal handler
+    g_signal_connect(Sent_Message, "clicked", G_CALLBACK(new_function), new_window);
+
+    // Set the label of the Sent_Message button to "Submit"
+    gtk_button_set_label(GTK_BUTTON(Sent_Message), "Submit");
+
+    // Generate a random 6-digit code
+    srand(time(NULL));
+    int code = rand() % 900000 + 100000;
+
+    // Retrieve the email label from the new_window object
+    GtkWidget *Show_Email = g_object_get_data(G_OBJECT(new_window), "Show_Email");
+    if (!GTK_IS_LABEL(Show_Email)) {
+        g_warning("Show_Email is not a valid GtkLabel widget");
+        return;
+    }
+
+    // Send the email with the 2FA code
+    const gchar *email = gtk_label_get_text(GTK_LABEL(Show_Email));
+    check_With_2FA(email, &code);
+
+    // Timer to check if the code is entered within 5 minutes
+    g_timeout_add_seconds(300, (GSourceFunc)timeout_callback, new_window);
+}
 
 void check_SignUp(GtkWidget *widget, gpointer user_data) {
     // Retrieve the signup window from user_data
@@ -219,6 +328,9 @@ void check_SignUp(GtkWidget *widget, gpointer user_data) {
     } else {
         gtk_widget_set_visible(First_Name_Button, FALSE);
         check_first_name(first_name_text, First_Name_Button);
+        if (gtk_widget_get_visible(First_Name_Button)) {
+            is_feild_empty = 1;
+        }
     }
 
     // Retrieve the Last_name information
@@ -234,6 +346,9 @@ void check_SignUp(GtkWidget *widget, gpointer user_data) {
     } else {
         gtk_widget_set_visible(Last_Name_Button, FALSE);
         check_last_name(Last_Name_text, Last_Name_Button);
+        if (gtk_widget_get_visible(Last_Name_Button)) {
+            is_feild_empty = 1;
+        }
     }
 
     // Retrieve the CIN information
@@ -249,6 +364,9 @@ void check_SignUp(GtkWidget *widget, gpointer user_data) {
     } else {
         gtk_widget_set_visible(CIN_Button, FALSE);
         check_CIN(CIN_text, CIN_Button);
+        if (gtk_widget_get_visible(CIN_Button)) {
+            is_feild_empty = 1;
+        }
     }
 
     // Retrieve the Email information
@@ -264,6 +382,9 @@ void check_SignUp(GtkWidget *widget, gpointer user_data) {
     } else {
         gtk_widget_set_visible(Email_Button, FALSE);
         check_email(Email_text, Email_Button);
+        if (gtk_widget_get_visible(Email_Button)) {
+            is_feild_empty = 1;
+        }
     }
 
     // Retrieve the Birthday information
@@ -279,6 +400,9 @@ void check_SignUp(GtkWidget *widget, gpointer user_data) {
     } else {
         gtk_widget_set_visible(Birthday_Button, FALSE);
         check_birthday(Birthday_text, Birthday_Button);
+        if (gtk_widget_get_visible(Birthday_Button)) {
+            is_feild_empty = 1;
+        }
     }
 
     // Retrieve the Password information
@@ -299,22 +423,31 @@ void check_SignUp(GtkWidget *widget, gpointer user_data) {
     } else {
         gtk_widget_set_visible(Password_Button, FALSE);
         check_password(Password_text, Confirm_Password_text, first_name_text, Last_Name_text, Password_Button);
+        if (gtk_widget_get_visible(Password_Button)) {
+            is_feild_empty = 1;
+        }
     }
 
     if (is_feild_empty) {
         GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(signup_window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "ALL Fields Required");
         g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_close), NULL);
         gtk_widget_show(dialog);
+    } else {
+        // All checks passed, open a new window and close the old one
+        open_new_window(first_name_text, Last_Name_text, CIN_text, Email_text, Birthday_text, Password_text);
+        gtk_window_close(GTK_WINDOW(signup_window));
     }
-
-    g_print("first_name: %s\n", first_name_text);
-    g_print("last_name: %s\n", Last_Name_text);
-    g_print("cin: %s\n", CIN_text);
-    g_print("Email: %s\n", Email_text);
-    g_print("Birthday: %s\n", Birthday_text);
-    g_print("Password: %s\n", Password_text);
-    g_print("Confirm Password : %s\n", Confirm_Password_text);
 }
+    // g_print("first_name: %s\n", first_name_text);
+    // g_print("last_name: %s\n", Last_Name_text);
+    // g_print("cin: %s\n", CIN_text);
+    // g_print("Email: %s\n", Email_text);
+    // g_print("Birthday: %s\n", Birthday_text);
+    // g_print("Password: %s\n", Password_text);
+    // g_print("Confirm Password : %s\n", Confirm_Password_text);
+
+
+
 
 static void signup_button_clicked(GtkButton *button, gpointer user_data) {
     GtkWidget *main_window = GTK_WIDGET(user_data);
@@ -443,17 +576,6 @@ static void signup_button_clicked(GtkButton *button, gpointer user_data) {
     gtk_entry_set_invisible_char(GTK_ENTRY(Password_Confirmation),'*');
 
 
-    //Confirm image
-    GtkWidget *Confirm_Password_button = gtk_button_new();
-    GtkWidget *Confirm_Password_image = gtk_image_new_from_file("../info_red.png");
-    GtkWidget *Confirm_Password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    gtk_box_append(GTK_BOX(Confirm_Password_hbox), Confirm_Password_image);
-    gtk_button_set_child(GTK_BUTTON(Confirm_Password_button), Confirm_Password_hbox);
-
-    gtk_fixed_put(GTK_FIXED(signup_fix), Confirm_Password_button, 310, 340);
-    gtk_widget_set_size_request(Confirm_Password_button, 20, 20);
-    gtk_widget_set_visible(Confirm_Password_button, FALSE);
-
     // Store the entry widgets in the login window using g_object_set_data
     g_object_set_data(G_OBJECT(signup_window), "signup_fix", signup_fix);
     g_object_set_data(G_OBJECT(signup_window), "First Name", first_name);
@@ -469,9 +591,6 @@ static void signup_button_clicked(GtkButton *button, gpointer user_data) {
     g_object_set_data(G_OBJECT(signup_window), "Email Image", email_button);
     g_object_set_data(G_OBJECT(signup_window), "Birthday Image", Birthday_button);
     g_object_set_data(G_OBJECT(signup_window), "Password Image", Password_button);
-    g_object_set_data(G_OBJECT(signup_window), "Confirm Password Image", Password_Confirmation);
-
-
 
     // Create Submit Button
     GtkWidget *Submit = gtk_button_new_with_label("Submit");
@@ -482,12 +601,8 @@ static void signup_button_clicked(GtkButton *button, gpointer user_data) {
 
 
 
-
-
     // Set the fixed layout as the child of the login window
     gtk_window_set_child(GTK_WINDOW(signup_window), signup_fix);
-
-
 
 
     // Show the login window
@@ -497,7 +612,9 @@ static void signup_button_clicked(GtkButton *button, gpointer user_data) {
     gtk_widget_hide(main_window);
 
 }
+static void verifie_email_signup(GtkButton *button, gpointer user_data) {
 
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                   //
 //                                                                                                   //
