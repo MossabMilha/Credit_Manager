@@ -85,17 +85,19 @@ int send_email(const char *access_token, const char *to_email, const char *subje
     return (res == CURLE_OK) ? 0 : 1;
 }
 
-void check_With_2FA(const char *email, const int *code) {
-    const char *access_token = "ya29.a0AeDClZCZUgVNY7Ks9mpdVHHeBBzskjeyUSNq-kQUj0lQnfXtFdYxCkEZiyloGd7waa2102dkWv6j1Y24IjMXREhs95nFexCDW94z9b2sRJW08qD_R4fPmRyPmUlm2TTfOrhG5fs9DyF1gF1bzq8k-GBq71A0relhx1RX6jiyaCgYKAakSARMSFQHGX2Mik8Jh0UEzlQQFnlMmdwE6kw0175";
+void check_With_2FA(const char *email,  int *code) {
+    const char *access_token = "ya29.a0AeDClZCQx0Jvug7JUa0PdQlBK7RKnz3bWeI-ZRnYCimbicrrC-vsj3LTlBZOfSF4Be3N0I3DKgLzV-FGoTedD51NHGidBVvx_hFxqZPFjWgtBKeVhZofrMi4zD1KPmH11yUr-Rm-IR9IBPQd7pzk2tNV77nx94Y00AVAj2pzaCgYKAW0SARMSFQHGX2Miicp879pn7-RcZnfBz0j2og0175";
     const char *to_email = email;
     const char *subject = "Test Email";
     char message[256];
+    printf("%d\n", *code);
     snprintf(message, sizeof(message),
              "Dear User,\n"
              "Your verification code is: %d\n"
              "Please note that this code is valid for only 5 minutes. If you did not request this code, please ignore this email.\n"
              "Thank you,\n"
-             "Your Credit Manager Team", code);
+             "Your Credit Manager Team", *code);
+    printf("%s\n", message);
 
     send_email(access_token, to_email, subject, message);
 }

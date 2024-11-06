@@ -7,6 +7,7 @@
 
 #define MIN_PASSWORD_LENGTH 8
 #define SPECIAL_CHARACTERS "!@#$%^&*()-_=+[]{}|;:'\",.<>?/\\"
+int global_2FA_code;
 
 #define KEY "1A5"
 
@@ -254,10 +255,7 @@ gboolean timeout_callback(gpointer user_data) {
     return FALSE; // Stop the timeout
 }
 
-void new_function() {
-    g_print("Hello world\n");
-}
-
+void new_function(GtkWidget *button, gpointer user_data);
 void Email_2FA(GtkWidget *button, gpointer user_data) {
     GtkWidget *new_window = GTK_WIDGET(user_data);
 
@@ -273,6 +271,7 @@ void Email_2FA(GtkWidget *button, gpointer user_data) {
     gtk_entry_set_placeholder_text(GTK_ENTRY(Code_2FA), "Enter the Code you Received");
     gtk_fixed_put(GTK_FIXED(signup_fix), Code_2FA, 50, 300);
     gtk_widget_set_size_request(Code_2FA, 250, 25);
+    g_object_set_data(G_OBJECT(new_window), "Code_2FA", Code_2FA);
 
     // Retrieve the Sent_Message button from the new_window object
     GtkWidget *Sent_Message = g_object_get_data(G_OBJECT(new_window), "Sent Message");
@@ -292,7 +291,8 @@ void Email_2FA(GtkWidget *button, gpointer user_data) {
 
     // Generate a random 6-digit code
     srand(time(NULL));
-    int code = rand() % 900000 + 100000;
+    global_2FA_code = rand() % 900000 + 100000;
+    g_print("%d\n", global_2FA_code);
 
     // Retrieve the email label from the new_window object
     GtkWidget *Show_Email = g_object_get_data(G_OBJECT(new_window), "Show_Email");
@@ -303,10 +303,29 @@ void Email_2FA(GtkWidget *button, gpointer user_data) {
 
     // Send the email with the 2FA code
     const gchar *email = gtk_label_get_text(GTK_LABEL(Show_Email));
-    check_With_2FA(email, &code);
+    check_With_2FA(email, &global_2FA_code);
 
     // Timer to check if the code is entered within 5 minutes
     g_timeout_add_seconds(300, (GSourceFunc)timeout_callback, new_window);
+}
+
+void new_function(GtkWidget *button, gpointer user_data) {
+    GtkWidget *new_window = GTK_WIDGET(user_data);
+    GtkWidget *Code_2FA = g_object_get_data(G_OBJECT(new_window), "Code_2FA");
+
+    GtkEntryBuffer *Code_2FA_buffer = gtk_entry_get_buffer(GTK_ENTRY(Code_2FA));
+    const gchar *entered_code = gtk_entry_buffer_get_text(Code_2FA_buffer);
+
+    // Strip leading and trailing whitespace from entered_code
+    gchar *trimmed_code = g_strstrip(g_strdup(entered_code));
+
+    if ((unsigned int)atoi(trimmed_code) == global_2FA_code) {
+        g_print("Hello world\n");
+    } else {
+        g_print("Incorrect code\n");
+    }
+
+    g_free(trimmed_code);
 }
 
 void check_SignUp(GtkWidget *widget, gpointer user_data) {

@@ -266,6 +266,15 @@ PKG_CONFIG_ARGN:STRING=
 //pkg-config executable
 PKG_CONFIG_EXECUTABLE:FILEPATH=C:/msys64/mingw64/bin/pkg-config.exe
 
+//Value Computed by CMake
+Project_BINARY_DIR:STATIC=C:/Users/PC/CLionProjects/C_UI/cmake-build-debug
+
+//Value Computed by CMake
+Project_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+Project_SOURCE_DIR:STATIC=C:/Users/PC/CLionProjects/C_UI
+
 //Path to a library.
 SSL_EAY:FILEPATH=C:/msys64/mingw64/lib/libssl.dll.a
 
